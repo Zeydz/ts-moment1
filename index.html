@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+    <script src="src/js/test.ts" type="module"></script>
+    <link rel="stylesheet" href="src/css/styling.scss">
+</head>
+<body>
+    <h1>Kurshantering</h1>
+
+    <!-- Formulär för att lägga till kurs -->
+    <form id="addCourseForm">
+        <label for="code">Kurskod:</label>
+        <input type="text" id="code" required>
+        <label for="name">Kursnamn:</label>
+        <input type="text" id="name" required>
+        <label for="progression">Progression:</label>
+        <select id="progression" required>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+        </select>
+        <label for="syllabus">Kursplan (URL):</label>
+        <input type="text" id="syllabus" required>
+        <button type="submit">Lägg till kurs</button>
+    </form>
+
+    <!-- Lista för att visa kurser -->
+    <ul id="courseList"></ul>
+</body>
+</html>
