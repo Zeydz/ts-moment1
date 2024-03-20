@@ -1,10 +1,11 @@
-// Interface for course information
 
+// Deklaration av variabler
 const codeInputEl = document.getElementById("code") as HTMLInputElement;
 const nameInputEl = document.getElementById("name") as HTMLInputElement;
 const progInputEl = document.getElementById("progression") as HTMLInputElement;
 const syllabusInputEl = document.getElementById("syllabus") as HTMLInputElement;
 
+// Interface for course information
 interface CourseInfo {
     code: string;
     name: string;
@@ -31,12 +32,12 @@ function addCourse(course: CourseInfo): void {
 }
 
 // Visar kurser på webbplatsen
-function displayCourse(course: CourseInfo) : void {
+function displayCourse(course: CourseInfo): void {
     const courseList = document.getElementById("courseList");
 
     if (courseList) {
         courseList.innerHTML += `
-        <li> Code: ${course.code}, Name: ${course.name}, Progression: ${course.progression}, Syllabus: ${course.syllabus}
+        <li> Kod: ${course.code}, Namn: ${course.name}, Progression: ${course.progression}, Syllabus: ${course.syllabus}
         </li>
         `
     }
@@ -46,13 +47,19 @@ document.getElementById('addCourseForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
 
     /* Skapa ett nytt objekt */
-    const newCourseTest : CourseInfo = {
-    code: codeInputEl.value,
-    name: nameInputEl.value,
-    progression: progInputEl.value,
-    syllabus: syllabusInputEl.value
-}
+    const newCourse: CourseInfo = {
+        code: codeInputEl.value,
+        name: nameInputEl.value,
+        progression: progInputEl.value,
+        syllabus: syllabusInputEl.value
+    }
 
-    addCourse(newCourseTest);
-    displayCourse(newCourseTest);
-})
+    addCourse(newCourse);
+    displayCourse(newCourse);
+
+    // Återställ formulärfälten till deras ursprungliga värden
+    codeInputEl.value = '';
+    nameInputEl.value = '';
+    progInputEl.value = 'A';
+    syllabusInputEl.value = '';
+});
