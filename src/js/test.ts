@@ -30,3 +30,14 @@ function addCourse(course: CourseInfo): void {
     console.log('Lagt till kurs i listan');
 }
 
+// Visar kurser på webbplatsen
+function displayCourse(course: CourseInfo) : void {
+    const courseList = document.getElementById("courseList");
+
+    if (courseList) {
+        courseList.innerHTML += `
+        <li> Code: ${course.code}, Name: ${course.name}, Progression: ${course.progression}, Syllabus: ${course.syllabus}
+        </li>
+        `
+    }
+}
