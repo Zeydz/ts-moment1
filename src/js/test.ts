@@ -41,3 +41,18 @@ function displayCourse(course: CourseInfo) : void {
         `
     }
 }
+
+document.getElementById('addCourseForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    /* Skapa ett nytt objekt */
+    const newCourseTest : CourseInfo = {
+    code: codeInputEl.value,
+    name: nameInputEl.value,
+    progression: progInputEl.value,
+    syllabus: syllabusInputEl.value
+}
+
+    addCourse(newCourseTest);
+    displayCourse(newCourseTest);
+})
