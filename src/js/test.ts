@@ -1,3 +1,5 @@
+// Deklarera en tom array för kurser, för att kunna göra en kontroll
+let coursesCheck: CourseInfo[] = [];
 
 // Deklaration av variabler
 const codeInputEl = document.getElementById("code") as HTMLInputElement;
@@ -20,7 +22,7 @@ function addCourse(course: CourseInfo): void {
     let courses: CourseInfo[] = JSON.parse(localStorage.getItem('courses') || '[]');
 
     if (courses.some(c => c.code === course.code)) {
-        console.error('Kurskoden existerar redan. Försök igen med en annan kod.')
+        console.error('Kurskoden existerar redan. Försök igen med en annan kod.');
         return;
     }
 
@@ -32,39 +34,79 @@ function addCourse(course: CourseInfo): void {
     console.log('Lagt till kurs i listan');
 }
 
-// Visar kurser på webbplatsen
+// Funktion för att visa en kurs med knappar för att ta bort och ändra
 function displayCourse(course: CourseInfo): void {
-    
     if (courseList) {
-        courseList.innerHTML += `
-        <li> Kod: ${course.code}, Namn: ${course.name}, Progression: ${course.progression}, Syllabus: ${course.syllabus}
-        </li>
-        `
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+        <span>Kod: ${course.code}, Namn: ${course.name}, Progression: ${course.progression}, Syllabus: ${course.syllabus}</span><br>
+        <button class="remove-btn" style="margin-top:15px;">Ta bort</button>
+        <button class="edit-btn">Ändra</button>
+        `;
+        courseList.appendChild(listItem);
+
+        // Lägg till eventlyssnare för knapparna
+        const removeButton = listItem.querySelector('.remove-btn');
+        const editButton = listItem.querySelector('.edit-btn');
+        if (removeButton && editButton) {
+            removeButton.addEventListener('click', () => {
+                removeCourse(course);
+                listItem.remove();
+            });
+            editButton.addEventListener('click', () => {
+                editCourse(course);
+            });
+        }
     }
 }
+
+// Funktion för att ta bort en kurs från kurslistan och localStorage
+function removeCourse(course: CourseInfo): void {
+    let courses: CourseInfo[] = JSON.parse(localStorage.getItem('courses') || '[]');
+    courses = courses.filter(c => c.code !== course.code);
+    localStorage.setItem('courses', JSON.stringify(courses));
+    coursesCheck = [];
+}
+
+// Funktion för att ändra en befintlig kurs
+function editCourse(course: CourseInfo): void {
+    console.log('Ändra kurs:', course);
+}
+
 // Skickar med data till de andra funktionerna, nollställer värde
 document.getElementById('addCourseForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    /* Skapa ett nytt objekt */
+    // Skapa ett nytt objekt
     const newCourse: CourseInfo = {
         code: codeInputEl.value,
         name: nameInputEl.value,
         progression: progInputEl.value,
         syllabus: syllabusInputEl.value
-    }
-    //Kör funktioner och skickar med newCourse
-    addCourse(newCourse);
-    displayCourse(newCourse);
+    };
 
     // Återställ formulärfälten till deras ursprungliga värden
     codeInputEl.value = '';
     nameInputEl.value = '';
     progInputEl.value = 'A';
     syllabusInputEl.value = '';
+
+    // Kontrollera om kurskoden redan finns i listan
+    if (coursesCheck.some(course => course.code === newCourse.code)) {
+        console.error('Kurskoden existerar redan. Försök igen med en annan kod.');
+        alert('Kurskoden existerar redan. Försök igen med en annan kod.');
+        return;
+    }
+
+    // Kör funktioner och skickar med newCourse ifall if-satsen inte stoppar
+    addCourse(newCourse);
+    displayCourse(newCourse);
+
+    // Lägg till den nya kursen i kontrollarrayen som används för att inte lägga till dubbletter
+    coursesCheck.push(newCourse);
 });
 
-//Funktion för att ladda in sparade kurser från localStorage
+// Funktion för att ladda in sparade kurser från localStorage
 function loadCourses(): CourseInfo[] {
     return JSON.parse(localStorage.getItem('courses') || '[]');
 }
@@ -76,6 +118,8 @@ function initializePage(): void {
     // Visa alla sparade kurser på webbplatsen
     savedCourses.forEach(course => {
         displayCourse(course);
+        // Lägg till den nya kursen i kontrollarrayen som används för att inte lägga till dubbletter
+        coursesCheck.push(course);
     });
 }
 
@@ -91,6 +135,8 @@ function clearCourses(): void {
     if (courseList) {
         courseList.innerHTML = '';
     }
+    // Återställ kontrollarrayen som används för att inte lägga till dubbletter
+    coursesCheck = [];
 }
 
 // Kör initializePage när sidan laddas

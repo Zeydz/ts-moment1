@@ -41,6 +41,7 @@ button {
     &:hover {
         background-color: $secondary-color;
     }
+
 }
 
 ul {
@@ -61,4 +62,9 @@ a {
     &:hover {
         text-decoration: underline;
     }
+}
+
+.remove-btn {
+    background-color: red;
+
 }
