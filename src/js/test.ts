@@ -21,7 +21,7 @@ interface CourseInfo {
 
 // Funktion för att lägga till en ny kurs i localStorage
 function addCourse(course: CourseInfo): void {
-    //Ladda in sparade kurser från localStorage
+    // Ladda in sparade kurser från localStorage
     let courses: CourseInfo[] = JSON.parse(localStorage.getItem('courses') || '[]');
 
     if (courses.some(c => c.code === course.code)) {
@@ -29,13 +29,13 @@ function addCourse(course: CourseInfo): void {
         return;
     }
 
-    //Lägg till kursen till listan
+    // Lägg till kursen till listan
     courses.push(course);
 
     // Uppdatera localStorage med den nya listan
     localStorage.setItem('courses', JSON.stringify(courses));
-    console.log('Lagt till kurs i listan');
 }
+
 
 // Funktion för att visa en kurs med knappar för att ta bort och ändra
 function displayCourse(course: CourseInfo): void {
@@ -46,10 +46,10 @@ function displayCourse(course: CourseInfo): void {
         const listItem = document.createElement('li');
 
         // Anger ID till LI-elementet
-        listItem.id = itemID; 
+        listItem.id = itemID;
 
         listItem.innerHTML = `
-        <span>Kod: ${course.code}, Namn: ${course.name}, Progression: ${course.progression}, Syllabus: ${course.syllabus}</span><br>
+        <span><b>Kurskod:</b> ${course.code}<br> <b>Kursnamn:</b> ${course.name}<br> <b>Progression:</b> ${course.progression}<br> <b>Syllabus:</b> ${course.syllabus}</span><br>
         <button class="remove-btn" style="margin-top:15px;">Ta bort</button>
         <button class="edit-btn">Ändra</button>
         `;
@@ -84,7 +84,7 @@ function editCourse(course: CourseInfo, itemID: string): void {
     const editForm = document.createElement('form');
     editForm.innerHTML = `
         <label for="editCode">Kurskod:</label>
-        <input type="text" id="editCode" value="${course.code}" required>
+        <input type="text" id="editCode" value="${course.code}" required disabled>
         <label for="editName">Kursnamn:</label>
         <input type="text" id="editName" value="${course.name}" required>
         <label for="editProgression">Progression:</label>
@@ -118,84 +118,109 @@ function editCourse(course: CourseInfo, itemID: string): void {
 
 // Funktion för att spara det ändrade värdet
 function saveCourseChanges(oldCourse: CourseInfo, editForm: HTMLFormElement, itemID: string): void {
+    
     const editedCourse: CourseInfo = {
         code: (document.querySelector('#editCode') as HTMLInputElement).value,
         name: (document.querySelector('#editName') as HTMLInputElement).value,
         progression: (document.querySelector('#editProgression') as HTMLSelectElement).value,
         syllabus: (document.querySelector('#editSyllabus') as HTMLInputElement).value
-    }
-    // Hitta <li> elementet som innehåller kursen och uppdatera innehållet
+    };
+
+    // Tar värdet från editedCourse och ersätter oldCourse
+    Object.assign(oldCourse, editedCourse);
+
     const listItem = document.getElementById(itemID);
+
+    // Kod för att visa det nya elementet
     if (listItem) {
         listItem.innerHTML = `
-            <span>Kod: ${editedCourse.code}, Namn: ${editedCourse.name}, Progression: ${editedCourse.progression}, Syllabus: ${editedCourse.syllabus}</span><br>
+            <span><b>Kurskod:</b> ${oldCourse.code}<br> <b>Kursnamn:</b> ${oldCourse.name}<br> <b>Progression:</b> ${oldCourse.progression}<br> <b>Syllabus:</b> ${oldCourse.syllabus}</span><br>
             <button class="remove-btn" style="margin-top:15px;">Ta bort</button>
             <button class="edit-btn">Ändra</button>
         `;
-        // Lägg till eventlyssnare för knapparna igen efter att innehållet har uppdaterats
+    }
+
+    // Tar data från localStorage. En if-sats för att kontrollera kurskoderna med nya & gamla värden. Returnerar data.
+    const coursesJSON = localStorage.getItem('courses');
+    if (coursesJSON) {
+        const courses: CourseInfo[] = JSON.parse(coursesJSON);
+
+        const updatedCourses = courses.map(course => {
+            if (course.code === oldCourse.code) {
+                return editedCourse;
+            } else {
+                return course;
+            }
+        });
+
+        // Uppdaterar localStorage med det ändrade värdet
+        localStorage.setItem('courses', JSON.stringify(updatedCourses));
+    } else {
+        console.log("No courses found in localStorage.");
+    }
+
+    // Lägg till eventlyssnare för knapparna igen, så att knapparna fungerar efter ändring
+    if (listItem) {
         const removeButton = listItem.querySelector('.remove-btn');
         const editButton = listItem.querySelector('.edit-btn');
+
         if (removeButton && editButton) {
             removeButton.addEventListener('click', () => {
-                removeCourse(editedCourse, itemID);
+                removeCourse(oldCourse, itemID);
                 listItem.remove();
             });
             editButton.addEventListener('click', () => {
-                editCourse(editedCourse, itemID);
+                editCourse(oldCourse, itemID);
             });
         }
     }
-    // Uppdatera kursobjektet med de nya värdena
-    Object.assign(oldCourse, editedCourse);
 
-    // Ta bort formuläret efter redigering
     editForm.remove();
 }
+// Skickar med data till de andra funktionerna, nollställer värde
+document.getElementById('addCourseForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
 
+    // Skapa ett nytt objekt
+    const newCourse: CourseInfo = {
+        code: codeInputEl.value,
+        name: nameInputEl.value,
+        progression: progInputEl.value,
+        syllabus: syllabusInputEl.value
+    };
 
+    // Återställ formulärfälten till deras ursprungliga värden
+    codeInputEl.value = '';
+    nameInputEl.value = '';
+    progInputEl.value = 'A';
+    syllabusInputEl.value = '';
 
-    // Skickar med data till de andra funktionerna, nollställer värde
-    document.getElementById('addCourseForm')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-
-        // Skapa ett nytt objekt
-        const newCourse: CourseInfo = {
-            code: codeInputEl.value,
-            name: nameInputEl.value,
-            progression: progInputEl.value,
-            syllabus: syllabusInputEl.value
-        };
-
-        // Återställ formulärfälten till deras ursprungliga värden
-        codeInputEl.value = '';
-        nameInputEl.value = '';
-        progInputEl.value = 'A';
-        syllabusInputEl.value = '';
-
-        // Kontrollera om kurskoden redan finns i listan
-        if (coursesCheck.some(course => course.code === newCourse.code)) {
-            console.error('Kurskoden existerar redan. Försök igen med en annan kod.');
-            alert('Kurskoden existerar redan. Försök igen med en annan kod.');
-            return;
-        }
-
-        // Kör funktioner och skickar med newCourse ifall if-satsen inte stoppar
-        addCourse(newCourse);
-        displayCourse(newCourse);
-
-        // Lägg till den nya kursen i kontrollarrayen som används för att inte lägga till dubbletter
-        coursesCheck.push(newCourse);
-    });
-
-    // Funktion för att ladda in sparade kurser från localStorage
-    function loadCourses(): CourseInfo[] {
-        return JSON.parse(localStorage.getItem('courses') || '[]');
+    // Kontrollera om kurskoden redan finns i listan
+    if (coursesCheck.some(course => course.code === newCourse.code)) {
+        console.error('Kurskoden existerar redan. Försök igen med en annan kod.');
+        alert('Kurskoden existerar redan. Försök igen med en annan kod.');
+        return;
     }
 
-    // Funktion för att ladda in alla kurser vid initialisering
-    function initializePage(): void {
-        const savedCourses = loadCourses();
+    // Kör funktioner och skickar med newCourse ifall if-satsen inte stoppar
+    addCourse(newCourse);
+    displayCourse(newCourse);
 
+    // Lägg till den nya kursen i kontrollarrayen som används för att inte lägga till dubbletter
+    coursesCheck.push(newCourse);
+});
+
+// Funktion för att ladda in sparade kurser från localStorage
+function loadCourses() {
+    return JSON.parse(localStorage.getItem('courses') || '[]');
+}
+
+// Funktion för att ladda in alla kurser vid initialisering
+function initializePage(): void {
+    const savedCourses = loadCourses();
+
+    // Kontrollera om datan är en array innan iteration
+    if (savedCourses) {
         // Visa alla sparade kurser på webbplatsen
         savedCourses.forEach(course => {
             displayCourse(course);
@@ -203,22 +228,22 @@ function saveCourseChanges(oldCourse: CourseInfo, editForm: HTMLFormElement, ite
             coursesCheck.push(course);
         });
     }
+}
+// Eventlistener för att ta bort innehåll, kallar på funktion
+document.getElementById('remove')?.addEventListener('click', () => {
+    clearCourses();
+})
 
-    // Eventlistener för att ta bort innehåll, kallar på funktion
-    document.getElementById('remove')?.addEventListener('click', () => {
-        clearCourses();
-    })
-
-    // Funktion för att ta bort innehåll från skärm & localStorage
-    function clearCourses(): void {
-        localStorage.removeItem('courses');
-        const courseList = document.getElementById('courseList');
-        if (courseList) {
-            courseList.innerHTML = '';
-        }
-        // Återställ kontrollarrayen som används för att inte lägga till dubbletter
-        coursesCheck = [];
+// Funktion för att ta bort innehåll från skärm & localStorage
+function clearCourses(): void {
+    localStorage.removeItem('courses');
+    const courseList = document.getElementById('courseList');
+    if (courseList) {
+        courseList.innerHTML = '';
     }
+    // Återställ kontrollarrayen som används för att inte lägga till dubbletter
+    coursesCheck = [];
+}
 
-    // Kör initializePage när sidan laddas
-    initializePage();
+// Kör initializePage när sidan laddas
+initializePage();
